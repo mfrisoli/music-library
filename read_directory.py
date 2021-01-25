@@ -1,26 +1,17 @@
+import csv
 import os
 import eyed3
-import csv
+import pandas as pd
 
-class SongFile:
-    """
-    Family based on main parameters from a .mp3 file
-    """
-    def __init__(self, filename, title, artist, album, year, genre):
-        self.filename = filename
-        self.title = title
-        self.artist = artist
-        self.album = album
-        self.year = year
-        self.genre = genre
-
+# LOAD DATA
 def loadSongDataToCSV(fileNames, folderPath):
-    with open("songlog.csv", "w", newline="") as f:
+    with open("songlog.csv", "w", newline="", encoding=
+    'utf-8') as f:
         fieldnames = ["filename", "title", "artist", "album", "year", "genre"]
 
-        songLog = csv.DictWriter(f, fieldnames=fieldnames)
+        song_log = csv.DictWriter(f, fieldnames=fieldnames)
 
-        songLog.writeheader()
+        song_log.writeheader()
 
         count = 0
         for name in fileNames:
@@ -31,7 +22,7 @@ def loadSongDataToCSV(fileNames, folderPath):
                 audiofile = eyed3.load(path +r"\\" + name)
         
                 # Get Relevant data and add it to the log
-                songLog.writerow({
+                song_log.writerow({
                     'filename': name,
                     'title': audiofile.tag.title,
                     'artist': audiofile.tag.artist,
@@ -53,35 +44,6 @@ names = os.listdir(path)
 
 songs_loaded = loadSongDataToCSV(fileNames=names, folderPath=path)
 
-
-#print(names)
-#for name in names:
-#    #print(name[-4:])
-#    if name[-4:] == ".mp3":
-#        
-#        audiofile = eyed3.load(path +r"\\" + name)
-#        
-#        temp = SongFile(
-#            filename=name,
-#            title=audiofile.tag.title,
-#            artist=audiofile.tag.artist,
-#            album=audiofile.tag.album,
-#            year=audiofile.tag.getBestDate(),
-#            genre=audiofile.tag.genre
-#        )
-#        songdata.append(temp)
-#        count += 1
-        #print(name)
-#print (names)
-#for song in songdata:
-#    print(f"""
-#        File: {song.filename}
-#        Title: {song.title}
-#        Artist: {song.artist}
-#        Album: {song.album}
-#        Year: {song.year}
-#        Genre: {song.genre}""")
-
 print(f"""
     files found: {len(names)}
     MP3's loaded: {songs_loaded}
@@ -91,3 +53,26 @@ print(f"""
 for name in names:
     if name == "aaaa":
         print(name)
+
+sub_directories = os.walk(path)
+
+print(sub_directories)
+
+# TRANSFORM DATA: CREATE ARTIST DIRECTORY
+
+# Load list of all songs with PANDAS
+artist_df = pd.read_csv("songlog.csv")
+
+# Remove all Duplicates
+artist_df['artist'].drop_duplicates(inplace=True)
+
+# Remove special characters
+artist_df['artist'].replace(to_replace=r'[^a-zA-Z0-9]', regex=True, value=r' ', inplace=True)
+
+# Create directories
+artist_df['artist'].to_csv("artist_log.csv")
+
+
+
+
+# LOAD SONGS TO ARTIST FOLDER.

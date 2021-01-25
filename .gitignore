@@ -1,2 +1,7 @@
 .test_files
 .vscode
+.gitignore
+untitled.ipynb
+.ipynb_checkpoints
+
+
